@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:html/parser.dart' as parser;
-import 'package:html/dom.dart' as dom;
 import 'dart:convert';
 
 void main() {
@@ -20,6 +17,7 @@ class MyApp extends StatelessWidget {
       home: new MyHomePage(title: 'MyZIS'),
       routes: <String, WidgetBuilder> {
         '/USBlogPage': (BuildContext context) => new USBlogPage(),
+        '/LionsJournalPage': (BuildContext context) => new LionsJournalPage(),
       },
     );
   }
@@ -64,6 +62,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           new HomeCard(
             text: 'Lion\'s Journal',
+            route: '/LionsJournalPage',
           ),
           new HomeCard(
             text: 'Schedule',
@@ -112,7 +111,7 @@ class HomeCard extends StatelessWidget {
         color: cardColor,
         child: new Column(
           children: <Widget>[
-            new Text(text, style: new TextStyle(fontWeight: FontWeight.bold, color: textColor, fontSize: textSize)),
+            new Text(text, style: new TextStyle(fontWeight: FontWeight.bold, color: textColor, fontSize: textSize,)),
           ],
           mainAxisAlignment: MainAxisAlignment.center,
         ),
@@ -133,6 +132,7 @@ class USBlogPage extends StatefulWidget {
 
 class _USBlogPageState extends State<USBlogPage> {
   List data;
+  Map authors;
 
   @override
   Widget build(BuildContext context) {
@@ -148,6 +148,7 @@ class _USBlogPageState extends State<USBlogPage> {
             //Fetches complete post
             return new Card(
               child: new Column(
+
                 children: <Widget>[
                   new Padding(
                     padding: new EdgeInsets.only(top: 4.0, left: 8.0),
@@ -171,16 +172,77 @@ class _USBlogPageState extends State<USBlogPage> {
       ),
     );
   }
-
   fetch_posts() async{
     var httpClient = createHttpClient();
-    var response = await httpClient.get("https://blogs.zis.ch/us/wp-json/wp/v2/posts");
+    var posts = await httpClient.get("https://blogs.zis.ch/us/wp-json/wp/v2/posts");
+    setState((){
+      data = JSON.decode(posts.body);
+    });
+  }
+
+  @override
+  void initState() {
+    fetch_posts();
+  }
+}
+
+class LionsJournalPage extends StatefulWidget {
+  LionsJournalPage({Key key}) : super(key: key);
+
+  static const String routeName = "/LionsJournalPage";
+
+  @override
+  _LionsJournalPageState createState() => new _LionsJournalPageState();
+}
+
+
+class _LionsJournalPageState extends State<LionsJournalPage> {
+  List data;
+
+  @override
+  Widget build(BuildContext context) {
+    return new Scaffold(
+      appBar: new AppBar(
+        title: new Text('Lion\'s Journal'),
+      ),
+      body: new ListView.builder(
+        padding: new EdgeInsets.only(bottom: 20.0, top: 0.0, left: 8.0, right: 8.0),
+        itemCount: data == null ? 0 : data.length,
+
+        itemBuilder: (BuildContext context, int index) {
+          return new Card(
+            child: new Column(
+              children: <Widget>[
+                new Padding(
+                  padding: new EdgeInsets.only(top: 4.0, left: 8.0),
+                  child: new Text(
+                    data[index]['title']['rendered'].replaceAll(new RegExp(r'<[^>]*>|\[.*\]|\&.*;'), ''),
+                    style: new TextStyle(fontWeight: FontWeight.bold,color: new Color(0xFF005A84)),
+                  ),
+                ),
+                //TODO Insert Date and Author (Add featured Media)
+                new Padding(
+                  padding: new EdgeInsets.all(8.0),
+                  child: new Text(
+                    data[index]['content']['rendered'].toString().replaceAll(new RegExp(r'<[^>]*>|\&.*;'), ''),
+                    style: new TextStyle(color: new Color(0xFF005A84)),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+  fetch_posts() async{
+    var httpClient = createHttpClient();
+    var response = await httpClient.get("https://blogs.zis.ch/lionsjournal/wp-json/wp/v2/posts");
     setState((){
       data = JSON.decode(response.body);
     });
   }
 
-  @override
   void initState() {
     fetch_posts();
   }

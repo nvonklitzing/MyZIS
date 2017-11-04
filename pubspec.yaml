@@ -15,10 +15,10 @@ dev_dependencies:
 
 # The following section is specific to Flutter.
 flutter:
-#  fonts:
-#    - family: Montserrat
-#      fonts:
-#        - asset: assets/fonts/montserrat.ttf
+  fonts:
+    - family: Montserrat
+      fonts:
+        - asset: assets/fonts/montserrat.ttf
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the Icons class.
